@@ -7,16 +7,22 @@ ul {
     font-size: 0;
     color: #555;
 }
+.calendar {
+    height: 100%;
+    width: 100%;
+    padding: 0;
+    margin: 0;
+}
 
 /* Times */
-ul.time {
+ul#times {
     height: calc(100% - 80px);
     margin-top: 80px; /* height of weekdays and span in dates */
     width: 50px;
     overflow: hidden;
     float: left;
 }
-ul.time li {
+ul#times li {
     width: 100%;
     height: calc(100% / 24);
     text-align: center;
@@ -24,14 +30,14 @@ ul.time li {
 }
 
 /* Weekdays */
-ul.weekdays {
+ul#weekdays {
     height: 40px;
     width: calc(100% - 50px);
     max-width: calc(100% - 50px);
     display: block;
     float: left;
 }
-ul.weekdays li {
+ul#weekdays li {
     height: 40px;
     line-height: 40px;
     width: calc(100% / 7);
@@ -45,7 +51,7 @@ ul.weekdays li {
 }
 
 /* Reservations */
-ul.dates {
+ul#dates {
     height: 100%;
     width: calc(100% - 50px);
     max-width: calc(100% - 50px);
@@ -55,19 +61,19 @@ ul.dates {
     display: block;
     float: left;
 }
-ul.dates li {
+ul#dates li {
     height: 100%;
     width: calc(100% / 7);
     display: inline-block;
     font-size: 0;
     position: relative;
 }
-ul.dates li .reservations {
+ul#dates li .reservations {
     height: calc(100% - 40px);
     margin-top: 40px;
     position: relative;
 }
-ul.dates li div {
+ul#dates li div {
     position: absolute;
     left: 0;
     width: 100%;
@@ -83,7 +89,7 @@ ul.dates li div {
     background-color: #efefef;
     font-size: 14px;
 }
-ul.dates li span {
+ul#dates li span {
     position: absolute;
     top: 0;
     left: 0;
@@ -99,7 +105,7 @@ ul.dates li span {
 }
 
 /* Current time marker */
-.currentTimeMarker {
+#currentMarker {
     width: calc((100% - 50px) / 7);
     height: 2px;
     background: rgba(221, 51, 51, 0.9);
@@ -110,11 +116,4 @@ ul.dates li span {
     padding: 0;
     z-index: 99999;
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
-}
-.hiddenBackground {
-    position: absolute;
-    height: 1px;
-    width: 1px;
-    z-index: -99999;
-    top: 0;
 }

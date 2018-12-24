@@ -11,14 +11,20 @@
     </head>
     <body>
 
-        <ul class="time"></ul>
-        <ul class="weekdays"></ul>
-        <ul class="dates"></ul>
-        <div class="currentTimeMarker"></div>
-
+        <div class="calendar" id="demo-calendar"></div>
+        
         <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.23.0/moment.min.js"></script>
         <script type="text/javascript" src='https://cdnjs.cloudflare.com/ajax/libs/jquery/2.1.3/jquery.min.js'></script>
         <script type="text/javascript" src="js/calendar.js"></script>
+        <script type="text/javascript">
+            var calendar = new SimpleCalendar({
+                id: 'demo-calendar',
+                url: 'https://www.timvervoort.com/api/agenda/',
+                todayName: 'vandaag',
+                tomorrowName: 'morgen',
+                weekdayNames: ['zondag', 'maandag', 'dinsdag', 'woensdag', 'donderdag', 'vrijdag', 'zaterdag']
+            });
+        </script>
 
     </body>
 </html>
