@@ -2,20 +2,22 @@ class SimpleCalendar {
 
     constructor(settings) {
 
+        // Get required settings
         if (!settings.id) {
-            console.log('Error: no calendar id provided.');
+            console.log('%cError: no calendar id provided.', 'background-color:#dc3545;color:#fff;font-size:14px;padding:6px;border-radius:4px;');
         }
 
         if (!settings.url) {
-            console.log('Error: no calendar url provided.');
+            console.log('%cError: no calendar url provided.', 'background-color:#dc3545;color:#fff;font-size:14px;padding:6px;border-radius:4px;');
         }
 
-        // Settings
         this.calendarId = settings.id;
         this.url = settings.url;
+
+        // Optional settings
         this.hours = (settings.hours === undefined) ? '24' : settings.hours;
         this.nextDays = (settings.nextDays === undefined) ? '60' : settings.nextDays;
-        this.redrawTimeInt = (settings.redrawTimeInt === undefined) ? '1O' : settings.redrawTimeInt;
+        this.redrawTimeInt = (settings.redrawTimeInt === undefined) ? '10' : settings.redrawTimeInt;
         this.todayName = (settings.todayName === undefined) ? 'today' : settings.todayName;
         this.tomorrowName = (settings.tomorrowName === undefined) ? 'tomorrow' : settings.tomorrowName;
         this.weekdayNames = (settings.weekdayNames === undefined) ? ['sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday'] : settings.weekdayNames;
@@ -28,6 +30,9 @@ class SimpleCalendar {
 
     }
 
+    /**
+     * Initialize calendar. Draw needed objects, start listeners and fetch events.
+     */
     init() {
         var t = this;
         t.drawHours();
@@ -39,57 +44,134 @@ class SimpleCalendar {
         setInterval(function(){
             t.redrawCurrent();
         }, t.redrawTimeInt * 1000);
+        console.log('%cCalendar ready!', 'background-color:#28a745;color:#fff;font-size:14px;padding:6px;border-radius:4px;');
     }
 
+    /**
+     * Listen to mouse, touch and keyboard actions to navigate calendar.
+     */
     addNavigationListeners() {
+
         var t = this;
+
+        // Keyboard navigation
         document.onkeydown = function(e) {
             switch (e.keyCode) {
-                case 37:
+                case 37: // Left arrow
                     t.prevWeek();
                     break;
-                case 39:
+                case 39: // Right arrow
                     t.nextWeek();
                     break;
             }
         };
+
+        // Slide navigation using touch swiping
+        var touchstartX = 0;
+        var touchendX = 0;
+        var gestureZone = document.getElementById(this.calendarId);
+
+        // Listen to touch start
+        gestureZone.addEventListener('touchstart', function(event) {
+            touchstartX = event.changedTouches[0].screenX;
+        }, false);
+
+        // Listen to touch end
+        gestureZone.addEventListener('touchend', function(event) {
+            touchendX = event.changedTouches[0].screenX;
+            handleGesture();
+        }, false); 
+
+        // Deterimine touch gesture direction
+        function handleGesture() {
+            if (touchendX <= touchstartX) { // Slide to left, go to next image
+                t.nextWeek();
+            }
+            if (touchendX >= touchstartX) { // Slide to right, go to previous image
+                t.prevWeek();
+            }
+        }
+
     }
 
-    nextWeek() {
-        this.currentWeek++;
-        document.getElementById('dates').scrollLeft = (window.innerWidth - 50) * this.currentWeek;
+    /**
+     * Only show the current time marker on the current week, hide it in the other weeks.
+     * Assuming the currentMarker object exists.
+     */
+    toggleCurrent() {
+        this.initCurrent();
+        if (this.currentWeek !== 0) { document.getElementById('currentMarker').style.opacity = 0; }
+        else { document.getElementById('currentMarker').style.opacity = 1; }
     }
-    
-    prevWeek() {
-        this.currentWeek--;
-        document.getElementById('dates').scrollLeft = (window.innerWidth - 50) * this.currentWeek;
-    }  
-    
-    redrawCurrent() {
+
+    /**
+     * Create current time marker if it doesn't exist already.
+     */
+    initCurrent() {
         if (!document.getElementById('currentMarker')) {
             document.getElementById(this.calendarId).innerHTML += '<div id="currentMarker"></div>';
         }
-        var d = new Date();
+    }
+
+    /**
+     * Display next week.
+     */
+    nextWeek() {
+        if (this.currentWeek >= this.nextDays / 7 - 1) { return; } // No more days provided
+        this.currentWeek++;
+        document.getElementById('dates').scrollLeft = (window.innerWidth - 50) * this.currentWeek;
+        this.toggleCurrent(); // Check if current time marker is needed
+    }
+    
+    /**
+     * Display previous week.
+     */
+    prevWeek() {
+        if (this.currentWeek <= 0) { return; } // Can't go back in time
+        this.currentWeek--;
+        document.getElementById('dates').scrollLeft = (window.innerWidth - 50) * this.currentWeek;
+        this.toggleCurrent(); // Check if current time marker is needed
+    }  
+    
+    /**
+     * Redraw the current time marker to encoporate time passing.
+     */
+    redrawCurrent() {        
+        this.initCurrent(); // Create current time marker if it doesn't exist already
+        var d = new Date(); // Get current time
         var now = d.toString();
-        var open = new Date().setHours(0, 0, 0, 0);
-        var curDiff =  this.dateHelper.difference(open, now);
+        var open = new Date().setHours(0, 0, 0, 0); // Get the first second of today
+        var curDiff =  this.dateHelper.difference(open, now); // Hour difference between now and first second of today
         var curOffset = curDiff / this.hours;
-        var weekday = (d.getDay() - 1) % 7;
+        var weekday = (d.getDay() - 1) % 7; // Determine the day
         document.getElementById('currentMarker').style.top = 'calc((100% - 80px) * ' + curOffset + ' + 80px)';
-        document.getElementById('currentMarker').style.left = 'calc((100% / 7) * ' + weekday + ' + 50px)';
+        document.getElementById('currentMarker').style.left = 'calc(((100% - 50px) / 7) * ' + weekday + ' + 50px)';
     }
 
+    /**
+     * Get JSON reservations from server and draw them in the calendar.
+     */
     drawReservations() {
-        var t = this;
-        $.getJSON(this.url, function(data) {
-            $.each(data['data'], function(key, val) {
-                $.each(val['slots'], function(k, r) {
-                    t.drawReservation(val['date'], r['start'], r['end']);
-                });
-            });
-        });
+        var t = this; // Because this is overriden in the function below
+        var xmlhttp = new XMLHttpRequest();
+        xmlhttp.onreadystatechange = function() {
+            if (this.readyState == 4 && this.status == 200) {
+                var data = JSON.parse(this.responseText).data;
+                for (var day = 0; day < data.length; day++) {
+                    for (var slot = 0; slot < data[day].slots.length; slot++) {
+                        var reservation = data[day].slots[slot];
+                        t.drawReservation(data[day].date, reservation.start, reservation.end);
+                    }
+                }
+            }
+        };
+        xmlhttp.open("GET", this.url, true);
+        xmlhttp.send();
     }
 
+    /**
+     * Draw hour marks.
+     */
     drawHours() {
         if (!document.getElementById('times')) {
             document.getElementById(this.calendarId).innerHTML += '<ul id="times"></div>';
@@ -100,6 +182,9 @@ class SimpleCalendar {
         }
     }
 
+    /**
+     * Draw weekday names.
+     */
     drawWeekdays() {
         if (!document.getElementById('weekdays')) {
             document.getElementById(this.calendarId).innerHTML += '<ul id="weekdays"></ul>';
@@ -109,6 +194,9 @@ class SimpleCalendar {
         }
     }
 
+    /**
+     * Draw all possible future dates.
+     */
     drawDates() {
         if (!document.getElementById('dates')) {
             document.getElementById(this.calendarId).innerHTML += '<ul id="dates"></ul>';
@@ -122,18 +210,24 @@ class SimpleCalendar {
         }
     }
 
+    /**
+     * Draw a new reservation in the calendar.
+     * @param {String} date : YYYY-MM-DD
+     * @param {String} start : YYYY-MM-DD HH:MM:SS
+     * @param {String} end : YYYY-MM-DD HH:MM:SS
+     */
     drawReservation(date, start, end) {
         if (!date || !start || !end) { return; }
         var d = this.dateHelper.difference(this.beginDay, new Date().setHours(this.dateHelper.getHour(start), this.dateHelper.getMin(start), 0, 0));
         var offset = Math.max((100 / this.hours) * d, 0);
         var d = this.dateHelper.difference(new Date().setHours(this.dateHelper.getHour(start), this.dateHelper.getMin(start), 0, 0), new Date().setHours(this.dateHelper.getHour(end), this.dateHelper.getMin(end), 0, 0));
         var height = (100 / this.hours) * d;
-        var dateBlock = $('ul#dates li[data-date="' + date + '"] .reservations');
-        var reservationBlock = '<div data-start="' + start + '" data-end="' + end + '">' + this.dateHelper.get(start) + ' - ' + this.dateHelper.get(end) + '</div>';
-        dateBlock.append(reservationBlock);
-        var rObj = $('ul#dates li[data-date="' + date + '"] div[data-start="' + start + '"]');
-        rObj.css('top', 'calc(' + offset + '% )');
-        rObj.css('height', 'calc(' + height + '%)');
+        var dateBlock = document.querySelector('ul#dates li[data-date="' + date + '"] .reservations');
+        if (!dateBlock) { return; } // Date does not exist
+        dateBlock.innerHTML += '<div data-start="' + start + '" data-end="' + end + '">' + this.dateHelper.get(start) + ' - ' + this.dateHelper.get(end) + '</div>';
+        var rObj = document.querySelector('ul#dates li[data-date="' + date + '"] div[data-start="' + start + '"]');
+        rObj.style.top = 'calc(' + offset + '% )';
+        rObj.style.height = 'calc(' + height + '%)';
     }
 
 }
