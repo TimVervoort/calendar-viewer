@@ -21,7 +21,7 @@ class SimpleCalendar {
         this.todayName = (settings.todayName === undefined) ? 'today' : settings.todayName;
         this.tomorrowName = (settings.tomorrowName === undefined) ? 'tomorrow' : settings.tomorrowName;
         this.weekdayNames = (settings.weekdayNames === undefined) ? ['sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday'] : settings.weekdayNames;
-
+        this.loadingText = (settings.loadingText === undefined) ? 'Loading events...' : settings.loadingText;
         // Helpers
         this.beginDay = new Date().setHours(0, 0, 1, 0);  
         this.currentWeek = 0;
@@ -34,6 +34,7 @@ class SimpleCalendar {
      * Initialize calendar. Draw needed objects, start listeners and fetch events.
      */
     init() {
+        document.getElementById(this.calendarId).innerHTML += '<div id="loading">' + this.loadingText + '</div>';
         var t = this;
         t.drawHours();
         t.drawWeekdays();
@@ -163,6 +164,7 @@ class SimpleCalendar {
                         t.drawReservation(data[day].date, reservation.start, reservation.end);
                     }
                 }
+                document.getElementById('loading').style.opacity = '0'; // Hide loading message
             }
         };
         xmlhttp.open("GET", this.url, true);
