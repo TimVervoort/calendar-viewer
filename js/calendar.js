@@ -73,12 +73,12 @@ class SimpleCalendar {
         var gestureZone = document.getElementById(this.calendarId);
 
         // Listen to touch start
-        gestureZone.addEventListener('touchstart', function(event) {
+        gestureZone.addEventListener('touchstart', function(e) {
             touchstartX = event.changedTouches[0].screenX;
         }, false);
 
         // Listen to touch end
-        gestureZone.addEventListener('touchend', function(event) {
+        gestureZone.addEventListener('touchend', function(e) {
             touchendX = event.changedTouches[0].screenX;
             handleGesture();
         }, false); 
@@ -92,6 +92,13 @@ class SimpleCalendar {
                 t.prevWeek();
             }
         }
+
+        // Click to make reservations
+        document.addEventListener('click', function(e) {
+            var top = ((e.pageY - 80) / (document.body.scrollHeight - 80)) * 100;
+            var height = 100 / t.hours;
+            e.toElement.innerHTML += '<div style="top:'+top+'%;height:'+height+'%">New reservation</div>';
+        });
 
     }
 
@@ -144,7 +151,7 @@ class SimpleCalendar {
         var open = new Date().setHours(0, 0, 0, 0); // Get the first second of today
         var curDiff =  this.dateHelper.difference(open, now); // Hour difference between now and first second of today
         var curOffset = curDiff / this.hours;
-        var weekday = (d.getDay() - 1) % 7; // Determine the day
+        var weekday = (d.getDay() + 6) % 7; // Determine the day
         document.getElementById('currentMarker').style.top = 'calc((100% - 80px) * ' + curOffset + ' + 80px)';
         document.getElementById('currentMarker').style.left = 'calc(((100% - 50px) / 7) * ' + weekday + ' + 50px)';
     }
