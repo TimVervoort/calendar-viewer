@@ -22,6 +22,7 @@ class SimpleCalendar {
         this.tomorrowName = (settings.tomorrowName === undefined) ? 'tomorrow' : settings.tomorrowName;
         this.weekdayNames = (settings.weekdayNames === undefined) ? ['sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday'] : settings.weekdayNames;
         this.loadingText = (settings.loadingText === undefined) ? 'Loading events...' : settings.loadingText;
+        this.defaultDurationHours = (settings.defaultDurationHours === undefined) ? '2' : settings.defaultDurationHours;
         // Helpers
         this.beginDay = new Date().setHours(0, 0, 1, 0);  
         this.currentWeek = 0;
@@ -95,9 +96,26 @@ class SimpleCalendar {
 
         // Click to make reservations
         document.addEventListener('click', function(e) {
-            var top = ((e.pageY - 80) / (document.body.scrollHeight - 80)) * 100;
-            var height = 100 / t.hours;
-            e.toElement.innerHTML += '<div style="top:'+top+'%;height:'+height+'%">New reservation</div>';
+            if (e.toElement.classList.length > 0 && e.toElement.classList[0] == 'reservations') {
+                var top = ((e.pageY - 80) / (document.body.scrollHeight - 80)) * 100;
+                var beginHour = Math.floor(top / (100 / t.hours) + 1);
+                var endHour = beginHour + parseInt(t.defaultDurationHours);
+                var height = parseInt(t.defaultDurationHours) * (100 / t.hours);
+                var newReservation = '<div class="new-reservation" style="top:'+top+'%;height:'+height+'%">';
+                newReservation += beginHour + ':00 - ' + endHour + ':00<br />';
+                newReservation += 'New reservation</div>';
+                e.toElement.innerHTML += newReservation;
+            }
+        });
+
+        // Next week button
+        document.getElementById('next-week-btn').addEventListener('click', function(e) {
+            t.nextWeek();
+        });
+
+        // Previous week button
+        document.getElementById('prev-week-btn').addEventListener('click', function(e) {
+            t.prevWeek();
         });
 
     }
@@ -183,7 +201,7 @@ class SimpleCalendar {
      */
     drawHours() {
         if (!document.getElementById('times')) {
-            document.getElementById(this.calendarId).innerHTML += '<ul id="times"></div>';
+            document.getElementById(this.calendarId).innerHTML += '<ul id="times"><button id="prev-week-btn" title="Go to previous week">&lt;</button><button id="next-week-btn" title="Go to next week">&gt;</button></div>';
         }
         for (var i = 0; i < this.hours; i++) {
             var h = '0' + i;

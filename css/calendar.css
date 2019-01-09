@@ -50,6 +50,33 @@ ul#times li {
     text-align: center;
     font-size: 14px;
 }
+ul#times button {
+    height: 40px;
+    width: 50px;
+    text-align: center;
+    line-height: 40px;
+    box-sizing: border-box;
+    background-color: #ccc;
+    color: #333;   
+    padding: 0;
+    margin: 0;
+    position: fixed;
+    transition: all 0.3s;
+    border: none;
+    outline: none;
+}
+ul#times button:hover {
+    cursor: pointer;
+    background-color: #aaa;
+}
+button#prev-week-btn {
+    top: 0;
+    left: 0;
+}
+button#next-week-btn {
+    top: 40px;
+    left: 0;
+}
 
 /* Weekdays */
 ul#weekdays {
@@ -96,12 +123,13 @@ ul#dates li {
 }
 ul#dates li .reservations {
     height: calc(100% - 40px);
+    width: 100%;
+    background-color: #28a745;
     margin-top: 40px;
     position: relative;
 }
 ul#dates li .reservations:hover {
     cursor: pointer;
-    background-color: #ccc;
 }
 ul#dates li div {
     position: absolute;
@@ -115,11 +143,15 @@ ul#dates li div {
     padding: 10px;
     border-radius: 2px;
     box-shadow: 0px 0px 2px rgba(0, 0, 0, 0.5);
-    background-color: #efefef;
+    background-color: #dc3545;
+    color: #fff;
     font-size: 14px;
 }
 ul#dates li div:hover {
     cursor: default;
+}
+ul#dates li div.new-reservation {
+    background-color: #007bff;
 }
 ul#dates li span {
     position: absolute;
